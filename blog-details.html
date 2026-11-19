@@ -1,0 +1,102 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlogSpace | Blog Details</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="logo">🅱️BlogSpace</div>
+
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="create-blog.html">Create Blog</a>
+            <a href="login.html">Login</a>
+            <a href="register.html">Register</a>
+        </div>
+    </nav>
+
+    <!-- Blog Details -->
+    <section class="container">
+        <div class="blog-details" id="blogDetails">
+            <p>Loading blog details...</p>
+        </div>
+    </section>
+    <!-- Footer -->
+    <footer>
+        <p>© 2026 BlogSpace. All Rights Reserved.</p>
+    </footer>
+    <script>
+        const API_URL = 'http://localhost:5000/api/blogs';
+
+        const blogDetails = document.getElementById('blogDetails');
+
+        async function loadBlogDetails() {
+
+            const params = new URLSearchParams(window.location.search);
+            const blogId = params.get('id');
+
+            if (!blogId || !/^\d+$/.test(blogId)) {
+                blogDetails.innerHTML = '<h2>Invalid Blog ID</h2>';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/${encodeURIComponent(blogId)}`);
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Blog not found');
+                }
+
+                const blog = data.blog;
+
+                blogDetails.innerHTML = '';
+
+                const title = document.createElement('h1');
+                title.textContent = blog.title;
+
+                const category = document.createElement('p');
+                category.textContent = 'Category: ' + blog.category;
+
+                const author = document.createElement('p');
+                author.textContent = 'Written by: ' + blog.author;
+
+                const date = document.createElement('p');
+                date.textContent = 'Published on: ' +
+                    new Date(blog.createdAt).toLocaleDateString();
+
+                const content = document.createElement('p');
+                content.textContent = blog.content;
+                content.style.whiteSpace = 'pre-wrap';
+
+                const back = document.createElement('a');
+                back.href = 'index.html';
+                back.className = 'btn';
+                back.textContent = 'Back to Home';
+
+                blogDetails.appendChild(title);
+                blogDetails.appendChild(category);
+                blogDetails.appendChild(author);
+                blogDetails.appendChild(date);
+                blogDetails.appendChild(content);
+                blogDetails.appendChild(back);
+
+            } catch (error) {
+                console.error(error);
+                blogDetails.innerHTML = '<h2>' + error.message + '</h2>';
+            }
+        }
+
+        loadBlogDetails();
+    </script>
+
+</body>
+</html>

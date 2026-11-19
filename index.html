@@ -1,0 +1,163 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlogSpace | Home</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="logo">🅱️BlogSpace</div>
+
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="create-blog.html">Create Blog</a>
+            <a href="login.html">Login</a>
+            <a href="register.html">Register</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>Welcome to BlogSpace</h1>
+
+        <p>
+            Share your thoughts, explore new ideas,
+            and discover amazing stories.
+        </p>
+
+        <a href="register.html" class="btn">
+            Get Started
+        </a>
+
+        <br>
+
+        <input
+            type="text"
+            id="searchInput"
+            class="search-box"
+            placeholder="Search blog posts..."
+        >
+    </section>
+
+    <!-- Blog Section -->
+    <section class="container">
+
+        <h2 class="section-title">Latest Blog Posts</h2>
+
+        <div class="blog-grid" id="blogContainer">
+            <p>Loading blog posts...</p>
+        </div>
+
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>© 2026 BlogSpace. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        const API_URL = 'http://localhost:5000/api/blogs';
+
+        let allBlogs = [];
+
+        const blogContainer = document.getElementById('blogContainer');
+        const searchInput = document.getElementById('searchInput');
+
+        // Fetch blogs from MySQL through the backend
+        async function loadBlogs() {
+            try {
+                const response = await fetch(API_URL);
+
+                if (!response.ok) {
+                    throw new Error('Unable to fetch blogs');
+                }
+
+                const data = await response.json();
+
+                allBlogs = data.blogs || [];
+
+                displayBlogs(allBlogs);
+
+            } catch (error) {
+                console.error('Error:', error);
+
+                blogContainer.innerHTML =
+                    '<p>Unable to load blogs. Please check whether the backend server is running.</p>';
+            }
+        }
+
+        // Display blogs
+        function displayBlogs(blogs) {
+
+            blogContainer.innerHTML = '';
+
+            if (blogs.length === 0) {
+                blogContainer.innerHTML =
+                    '<p>No blog posts found.</p>';
+                return;
+            }
+
+            blogs.forEach(blog => {
+
+                const card = document.createElement('div');
+                card.className = 'blog-card';
+
+                const title = document.createElement('h3');
+                title.textContent = blog.title;
+
+                const category = document.createElement('p');
+                category.textContent = 'Category: ' + blog.category;
+
+                const content = document.createElement('p');
+                const shortContent = blog.content.length > 120
+                    ? blog.content.substring(0, 120) + '...'
+                    : blog.content;
+
+                content.textContent = shortContent;
+
+                const author = document.createElement('p');
+                author.textContent = 'By ' + blog.author;
+
+                const readMore = document.createElement('a');
+                readMore.href = 'blog-details.html?id=' + encodeURIComponent(blog.id);
+                readMore.className = 'read-more';
+                readMore.textContent = 'Read More →';
+
+                card.appendChild(title);
+                card.appendChild(category);
+                card.appendChild(content);
+                card.appendChild(author);
+                card.appendChild(readMore);
+
+                blogContainer.appendChild(card);
+
+            });
+        }
+
+        // Search blogs
+        searchInput.addEventListener('input', function () {
+
+            const searchText = this.value.toLowerCase();
+
+            const filteredBlogs = allBlogs.filter(blog =>
+                blog.title.toLowerCase().includes(searchText) ||
+                blog.category.toLowerCase().includes(searchText) ||
+                blog.content.toLowerCase().includes(searchText) ||
+                blog.author.toLowerCase().includes(searchText)
+            );
+
+            displayBlogs(filteredBlogs);
+        });
+
+        // Load blogs when page opens
+        loadBlogs();
+    </script>
+
+</body>
+</html>
